@@ -19,7 +19,7 @@ if gpus:
     except RuntimeError as e:
         print(e)
 else:
-    print("⚠️ 未偵測到 GPU！模型將使用 CPU 進行訓練，這可能會花費較長的時間。")
+    print("⚠️ 未偵測到 GPU！模型將使用 CPU ")
 print("=" * 50 + "\n")
 
 # ==========================================
@@ -31,7 +31,6 @@ MODEL_SAVE_PATH = "my_cnn_model.keras"
 IMG_HEIGHT = 224
 IMG_WIDTH = 224
 BATCH_SIZE = 32
-# ⚠️ 為了讓 Early Stopping 發揮作用，我們把 Epochs 拉長，給模型更多時間尋找最佳解
 EPOCHS = 40 
 
 # ==========================================
@@ -68,10 +67,10 @@ train_ds = train_ds.shuffle(1000).prefetch(buffer_size=AUTOTUNE)
 val_ds = val_ds.prefetch(buffer_size=AUTOTUNE)
 
 # ==========================================
-# 3. 建立 CNN 模型 (抗過擬合增強版)
+# 3. 建立 CNN 模型 
 # ==========================================
 
-# 🛡️ 新增防線一：資料增強 (Data Augmentation)
+# 資料增強 (Data Augmentation)
 # 每次訓練時，隨機對圖片進行翻轉、旋轉、縮放，逼迫模型不能死背圖片
 data_augmentation = tf.keras.Sequential([
     tf.keras.layers.RandomFlip("horizontal", input_shape=(IMG_HEIGHT, IMG_WIDTH, 3)),
@@ -129,7 +128,7 @@ checkpoint = tf.keras.callbacks.ModelCheckpoint(
     verbose=1
 )
 
-# 🛡️ 新增防線二：提早停損 (Early Stopping)
+# Early Stopping
 # 如果連續 8 個 Epoch 驗證集的 Loss 都沒有下降，就強制停止訓練，並還原到最好的那一刻
 early_stopping = tf.keras.callbacks.EarlyStopping(
     monitor='val_loss',
@@ -148,7 +147,7 @@ history = model.fit(
     epochs=EPOCHS,
     callbacks=[checkpoint, early_stopping] # 同時啟用儲存與停損機制
 )
-print("\n訓練結束！最佳模型已儲存為:", MODEL_SAVE_PATH)
+print("\n訓練結束！模型已儲存為:", MODEL_SAVE_PATH)
 
 # ==========================================
 # 6. 繪製 Accuracy 與 Loss 曲線
